@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 class ProductsListViewController: UIViewController {
     @IBOutlet weak var itemListTableVC: UITableView!
@@ -71,8 +72,9 @@ extension ProductsListViewController: UITableViewDelegate, UITableViewDataSource
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let product = viewModel.product(at: indexPath.row)
-//        let detailVC = ProductDetailViewController(product: product)
-//        navigationController?.pushViewController(detailVC, animated: true)
+        guard let detailVC = self.storyboard?.instantiateViewController(withIdentifier: "ProductDetailViewController") as? ProductDetailViewController else { return }
+        detailVC.product = product
+        navigationController?.pushViewController(detailVC, animated: true)
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
