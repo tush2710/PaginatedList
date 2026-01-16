@@ -14,6 +14,7 @@ class ProductsListViewController: UIViewController {
     private let viewModel = ProductsViewModel()
     private var activityIndicator: UIActivityIndicatorView!
     private var errorView: ErrorView?
+    private let footerSpinner = UIActivityIndicatorView(style: .medium)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -21,6 +22,8 @@ class ProductsListViewController: UIViewController {
         self.addActivityIndicator()
         viewModel.delegate = self
         viewModel.loadProducts()
+        
+        self.setupFooterSpinner()
     }
     
     private func registerTableCell() {
@@ -37,6 +40,21 @@ class ProductsListViewController: UIViewController {
         activityIndicator.center = view.center
         activityIndicator.hidesWhenStopped = true
         view.addSubview(activityIndicator)
+    }
+    
+    private func setupFooterSpinner() {
+        footerSpinner.hidesWhenStopped = true
+        footerSpinner.frame = CGRect(x: 0, y: 0, width: itemListTableVC.bounds.width, height: 60)
+    }
+    
+    private func showFooterSpinner() {
+        itemListTableVC.tableFooterView = footerSpinner
+        footerSpinner.startAnimating()
+    }
+    
+    private func hideFooterSpinner() {
+        footerSpinner.stopAnimating()
+        itemListTableVC.tableFooterView = nil
     }
     
     private func showError(_ error: NetworkError) {
@@ -89,17 +107,25 @@ extension ProductsListViewController: ProductsViewModelDelegate {
         errorView?.removeFromSuperview()
         errorView = nil
         itemListTableVC.reloadData()
+        hideFooterSpinner()
     }
     
     func didFailWithError(_ error: NetworkError) {
+        hideFooterSpinner()
         if viewModel.numberOfProducts == 0 {
             showError(error)
+        }else {
+            let alert = UIAlertController(title: "Error", message: error.message, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
         }
     }
     
     func didStartLoading() {
         if viewModel.numberOfProducts == 0 {
             activityIndicator.startAnimating()
+        } else {
+            showFooterSpinner()
         }
     }
     
